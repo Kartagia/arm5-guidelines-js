@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 // import Dashboard from './Dashboard.jsx';
 import Guideline from "./guideline.jsx";
 const guideline = {
-  name: "Creat",
+  name: "Create an insect",
   tech: "Creo",
   form: "Animal",
   level: 3

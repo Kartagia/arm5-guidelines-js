@@ -1,4 +1,13 @@
 
+/**
+ * @typedef {Object} GuidelineProps
+ * @property {import("./module.guideline.mjs").Guideline} model The shown guideline.
+ * @property {string} [mode] The mode of the guideline. 
+ */
+
+/**
+ * @param {GuidelineProps} props
+ */
 export default function Guideline(props) {
   const model = props.model;
   const key = `${model.form} ${model.tech} ${model.level ?? "Gen"}`;
