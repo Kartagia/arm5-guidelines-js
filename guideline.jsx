@@ -1,4 +1,9 @@
 
+import React from "react";
+import {
+  Paper, Typography, 
+  TableRow, TableHead, TableCell} from "@material-ui/core";
+
 /**
  * @typedef {Object} GuidelineProps
  * @property {import("./module.guideline.mjs").Guideline} model The shown guideline.
@@ -10,11 +15,11 @@
  */
 export default function Guideline(props) {
   const model = props.model;
-  const keyValue = `${model.form} ${model.tech} ${model.level ? model.level : "Gen"}`;
+  const keyValue = `${model.tech} ${model.form} ${model.level ? model.level : "Gen"}`;
   switch (props.mode) {
     case "table-row":
-      return (<tr><th>{keyValue}{model.name}</th><td>{model.description}</td></tr>)
+      return (<TableRow><TableCell>{keyValue}{model.name}</TableCell><TableCell>{model.description}</TableCell></TableRow>)
     default:
-      return (<article><header>{key}{model.name}</header><main>{model.description}</main></article>);
+      return (<Paper><header>{keyValue}:{model.name}</header><main>{model.description}</main></Paper>);
   }
 }
