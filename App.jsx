@@ -1,17 +1,20 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {render} from 'react-dom';
+import {Paper} from '@material-ui/core';
 // import Dashboard from './Dashboard.jsx';
-import Guideline from "./guideline.jsx";
+//import Guideline from "./guideline.jsx";
 const guideline = {
   name: "Create an insect",
   tech: "Creo",
   form: "Animal",
   level: 3
 };
-ReactDOM.render(
+const mountNode = document.getElementById("container");
+render((<Paper>Test</Paper>), mountNode);
+/*render(
   <Guideline model={
     guideline
-  } />, mountNode);
+  } />, mountNode);*/
 /* ReactDOM.render(
   <Dashboard classes={{
     tableContainer: '',

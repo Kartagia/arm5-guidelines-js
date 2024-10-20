@@ -6,6 +6,11 @@ SystemJS.config({
       'babelOptions': {
         react: true
       }
+    },
+    '*.mjs': {
+      'babelOptions': {
+        react: true
+      }
     }
   },
   map: {
