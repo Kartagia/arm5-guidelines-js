@@ -1,20 +1,22 @@
 
-import React from 'react';
+import React, {useId} from 'react';
 import {
+  Fragment,
   Table, TableRow, TableHead,
-  TableCell, Typography
+  TableCell, Typography, Input, FormControl, InpurLabel, FormHelperText, MenuItem
 } from '@material-ui/core';
+import {orElse} from "./utils.mjs";
 import Guideline from "./guideline.jsx";
+import FormInput from "./FormInput.mjs";
 
-/**
- * @typedef TYPE 
- * @param {TYPE|undefined|null} value 
- * @param {TYPE} defaultValue
- * @return {TYPE} If value is defined, the value. Otherwise the default value.
- */
-export function orElse(value, defaultValue) {
-  return value == null ? defaultValue : value;
+function getForms() {
+  return ["Animal", "Aquam", "Auram", "Ignem", "Terram", "Vim"].map( (name) => (new art(name, name.substring(0,1))));
 }
+
+function getTechniques() {
+  return ["Creo", "Intellego", "Muto", "Perdo", "Terram"].map( (name) => (new art(name, name.substring(0,1))));
+}
+
 
 /**
  * @template TYPE
@@ -74,8 +76,82 @@ export function GuidelineTable(props) {
 export function GuidelineList(props) {
   
   return (<section>
-  <header>Guidelines</header><main>{orElse(props.entries, []).map(
+  <header>{(props.title ? props.title : "Guidelines")}</header><main>{orElse(props.entries, []).map(
     (entry) => (<Guideline key={entry.id} model={entry.value}/>))}</main></section>)
+}
+
+/**
+ * The numeric form specific field props.
+ * @typedef {Object} NumberFormFieldProps
+ * @property {number} [min] The minimal value
+ * @property {number} [max] The maximal value
+ * @property {number} [current] The current value.
+ * @property {"number"} type
+ */
+
+/**
+ * The numeric form specific field props.
+ * @typedef {Object} TextFormFieldProps
+ * @property {number} [min] The minimal value
+ * @property {number} [max] The maximal value
+ * @property {number} [current] The current value.
+ * @property {"text"|undefined} type
+ */
+
+/**
+ * @template [TYPE=string] The content type.
+ * The list form specific field props.
+ * @typedef {Object} ListFormFieldProps
+ * @property {TYPE[]} items The possible values.
+ * @property {number} [current] The current value index.
+ * @property {"select"} type
+ */
+/**
+ * @template [TYPE=string] The content type.
+ * @typedef {(NumberFormFieldProps|TextFieldProps|ListFieldProps<TYPE>)} FormFieldProps
+ */
+
+/**
+ * Component representing a form field.
+* @template [TYPE=string] The content type.
+*  @param {FormFieldProps<TYPE>} props
+ */
+export function FormField(props) {
+  return (<FormInput {...props} />);
+}
+
+/**
+ * @param {Object} props
+ * @param {}
+ */
+export function GuidelineEditor(props) {
+  /*const nameId = useId();
+  const techId = useId();
+  const formId = useId();
+  const levelId = useId();*/
+  console.group("GuidelineEditor");
+  console.table({nameId, techId, formId, levelId});
+  try {
+  const fields = [
+    {title: "Name", id: nameId},
+    {title: "Technique", id: techId, type: "select", values: getTechniques()}, 
+    { title: "Form", id: formId,
+      type: "select", 
+      values: getForms()
+    },
+    { title: "Level", id: levelId, type: "number", min: 0}
+    
+    ];
+  return (<FormControl>
+  {
+    (<p>FormControl</p>)
+  }</FormControl>);
+  } catch (err) {
+    console.error(`${err.name
+    }`);
+    console.groupEnd();
+    return (<div className="error"><h1>{err.message}</h1></div>)
+  }
 }
 
 /**
@@ -105,5 +181,11 @@ console.groupEnd();
   });
   console.groupEnd();
     console.log("Create List");
-    return (<GuidelineList entries={guidelines} />)
+    if (props.readOnly) {
+      return (<GuidelineList entries={guidelines} />)
+    } else {
+      return (<Fragment><GuidelineList entries={guidelines}/>
+      <GuidelineEditor />
+      </Fragment>);
+    }
 }

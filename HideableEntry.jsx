@@ -44,7 +44,7 @@ import {Card, CardHeader, CardContent, Paper, Typography, Icon,  SvgIcon} from "
    console.log("Hideable initialized");
    const handleToggle = (event) => {
      if (!props.locked) {
-     setOpen(!open);
+       setOpen( (current) => (!current));
      }
    };
    return (<Card><CardHeader onClick={handleToggle} title={props.title}></CardHeader><CardContent>{props.content && props.content}{open && props.children}</CardContent></Card>);
