@@ -1,12 +1,29 @@
 import React from 'react';
 import {useState} from 'react';
 
-import { Paper, Button } from '@material-ui/core';
+import { Paper, Button, Typography} from '@material-ui/core';
 // import Dashboard from './Dashboard.jsx';
 import Guidelines from "./Guidelines.jsx";
 import Hideable from "./HideableEntry.jsx";
-import GuidelineEditor from "././GuidelinesEditor.jsx";
-import {getFormNames, getTechniqueNames, createGuideline, getGuideline} from "./guidelines.mjs"
+import {Choice} from "./GuidelinesEditor.jsx";
+
+import {ErrorBoundary} from "./ErrorBoundary.jsx";
+import {getFormNames, getTechniqueNames, createGuideline, getGuideline, createId, addGuideline} from "./guidelines.mjs"
+
+export function Tester(props) {
+  switch (typeof props.value) {
+    case "undefined":
+      throw SyntaxError("Missing required property");
+    case "number":
+      if (props.value >=0) {
+        return (<Typography>{props.value}</Typography>)
+      } else {
+        throw new RangeError(`Invalid value ${props.value}`)
+      }
+    case "object":
+      throw TypeError(`Invalid type ${typeof props.value}`);
+  }
+}
 
 export default function TestComponent({guidelines}) {
   const [guideline, setGuideline] = useState(getGuideline("1"));
@@ -19,17 +36,19 @@ export default function TestComponent({guidelines}) {
     name: "Create candlelight"
   });
   console.table(gl);
+  try {
+    console.log(`Added as ${addGuideline(gl)}`);
+  } catch (err) {
+    console.error(err);
+    console.error(err.cause ? `Cause ${err.cause}` :`No cause`)
+  }
   
   return (<Paper>
-    <p>Test</p>
+    <p>Test {createId()}</p>
     <Guidelines defaultValue={
     guidelines
   } readOnly={true} />
-  <Hideable title="Hideable" open={true}><p>Children</p><GuidelineEditor getValue={
-    function() { return guideline; }
-  } setValue={ function(newValue) {
-    setGuideline(newValue);
-  } } /></Hideable>
+  <Hideable title="Hideable" open={true}><ErrorBoundary><p>Children</p><Tester value={3}/><Choice label="Form" items={["An", "Aq", "Au"]} value="Aq"/></ErrorBoundary></Hideable>
   <Hideable title={(locked?"Locked":"Unlocked")} open={showLocked} locked={locked} content={<p>Locked Content</p>}><p>Locked Children</p></Hideable>
  
   <Button onClick={() => {

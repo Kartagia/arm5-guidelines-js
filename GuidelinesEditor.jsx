@@ -1,8 +1,77 @@
 import React from 'react';
-
+import {useState} from 'react';
 import {InputLabel, Input, Button, Select, MenuItem, FormContext} from '@material-ui/core'
 import {Guideline, getFormNames, getTechniqueNames, createGuideline} from './guidelines.mjs';
 import {NotFoundError, orElse} from './utils.mjs';
+
+/**
+ * Get property of an object or a default.
+ * @template [TYPE=any] The type of the property value.
+ * @template [SOURCE=any],
+ * @param {SOURCE} obj The source object.
+ * @param {string|symbol} name The property name.
+ * @param {TYPE} [defaultValue] The d3fault value.
+ * @returns {TYPE} If the source is an object with given property, its value. Otherwise the default value.
+ */
+function getProp(obj, name, defaultValue=undefined) {
+  if (typeof obj === "object" && obj != null && name in obj) {
+    return obj[name];
+  } else {
+    return defaultValue;
+  }
+}
+function getProps(obj, names, defaultValues) {
+  var result = [];
+  if (Array.isArray(names)) {
+      if (typeof obj === "object" && obj != null) {
+      return names.map((prop, index) => (prop in obj ? obj[prop] : defaultValues[length]));
+} else {
+  return names.map((prop, index) => (defaultValues[inddx]));
+};
+} else {
+  throw new TypeError("Invalid names");
+}
+}
+/**
+ * Create a choice dialog.
+ * @template ITEM The value type.
+ * @param {ITEM[]} props.items The items if choice.
+ * @param {string} props.label The label of the choice.
+ * @param {string} props.name The name of the component.
+ * @param {ITEM} props.value The current value.
+ * @param {import("./utils_react.mjs").ValueChangeHandler<TYPE>} [props.onChange] Report the value change.
+ */
+export function Choice(props) {
+  const [items, setItems] = React.useState(getProp(props, "items", []));
+  const [value, setValue] = useState(getProp(props, "value", values[0]));
+  
+  function labelOf(item, index) {
+    return "" + item;
+  }
+
+  function valueOf(item, index) {
+    return item;
+  }
+  
+  function keyOf(item, index) {
+    return `item-${index}`;
+  }
+  const keys = [...items].map(keyOf);
+  console.log("Keys: ", keys.join(" "));
+  const values = items.map(valueOf);
+console.log("Values: ", values.join("-"));
+  const labelList = items.map( (item, index) => (`${item}`) );
+  console.log("Labels: ",labelList.join("."));
+  
+  return (<Select value={getProp(props, "value", values[0])} name={getProp(props, "name", )}>{
+    items.map(
+    (item, index) => {
+    console.log(`Creating item ${item}@${index}`);
+      return (<MenuItem key={keys[index]} value={values[index]} >{labelList[index]}</MenuItem>);
+    }
+    )
+  }</Select>);
+}
 
 /**
  * Editor of a value.
@@ -12,20 +81,29 @@ import {NotFoundError, orElse} from './utils.mjs';
  * @property {Setter<TYPE, SyntaxError>} setValue Set the current value.
  * 
  */
+ 
+ const formNames = getFormNames();
+ console.log(`Forms: ${formNames.join(", ")}`)
+ const techniqueNames = getTechniqueNames();
 
 /**
  * Guideline editor.
  * @param {EditorProps<Guideline> & {techniques?: string[], forms?: string[]} } props
  */
 export default function GuidelineEditor(props) {
-  const [forms] = useState(orElse(props.forms, getFormNames()));
-  const [techniques] = useState(orElse(props.techniques, getTechniqueNames()));
-  const [current, setCurrent] = React.useState( (props.getValue ? props.getValue() :
-  createGuideline({tech: techniques[0],
-    form: forms[0],
+  const [hidden, setHidden] = useState(()=>{
+    return getProps(props, "hidden", false);
+  });
+  const [forms, setForms] = useState(() => { return getProp(props, "forms", formNames)});
+  const [techniques, setTechniques] = useState(() => { return getProp(props, "techniques", techniqueNames)});
+  const [current, setCurrent] = React.useState( () => { return props.getValue ? props.getValue() :
+  createGuideline({tech: (techniques[0] || "Perdo"),
+    form: (forms[0] || "Vim"),
     name: "New Guideline",
     level: null
-  }) ) );
+  }) });
+  const [changed, setChanged] = React.useState(false);
+  const nameId = "editor.name";
   if (current) {
     console.table({
       Level: (current.level == null ? "Generic": current.level), 
@@ -37,7 +115,9 @@ export default function GuidelineEditor(props) {
   } else {
     console.log("No current value")
   }
-  const [changed, setChanged] = React.useState(false);
+  
+  
+  console.log({changed, current, hidden, techniques, forms});
   
   function saveValue() {
     try {
@@ -62,18 +142,14 @@ export default function GuidelineEditor(props) {
     }
   }
   
-  return (<section hidden={hidden}>
-      
-     <Select name="tech" label="Technique" value={ ( current ? current.tech : "Creo") } >{
-       (techniques).map( (art) => (<MenuItem value={art.name}>{art.name}</MenuItem>))
-     }</Select>
-     <Select name="form" label="Form" value={(  current && current.form ? current.form : forms[0])}>{
-       (forms).map( (art) => (<MenuItem value={art.name}>{art.name}</MenuItem>))
-     }</Select>
-     
-    <InputLabel htmlFor={nameId}>Name</InputLabel>
-    <Input id={nameId} name="name"></Input>
-    <Button variant="contained" onClick={saveValue} disabled={!changed} >Save</Button>
-    <Button variant="contained" onClick={resetValue} >Cancel</Button>
-  </section>);
+  
+  console.table({nameId, current, changed});
+  console.groupEnd();
+  const choice =(<div>Choice placeholder</div>);
+  const buttonBar = (<div><Button variant="contained" onClick={saveValue} disabled={!changed} >Save</Button>
+    <Button variant="contained" onClick={resetValue} >Cancel</Button></div>);
+  
+  return (<div>{choice}
+    {buttonBar}
+  </div>);
 }

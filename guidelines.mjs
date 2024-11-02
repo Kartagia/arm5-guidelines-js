@@ -40,6 +40,8 @@ export function createGuideline(props) {
   
 }
 
+var ids = 2;
+
 /**
  * @type {Identified<Guideline>}
  */
@@ -52,6 +54,14 @@ var members = [
   level: 3
   })}
 ];
+
+/**
+ * Get next id.
+ * @type {import("./utils.mjs").Supplier<string>}
+ */
+export function createId() {
+  return `${ids++}`;
+}
 
 export function getTechniqueNames() {
   return ["Creo", "Intellego", "Muto"];
@@ -71,4 +81,15 @@ export function getGuidelines() {
 export function getGuideline(key) {
   const result = getGuidelines().find(function (entry) { return (entry.id === key)});
   return result ? result.value : undefined;
+}
+
+export function addGuideline(guideline) {
+  try {
+    const value = createGuideline(guideline);
+    const id = createId();
+    members.push({id,value});
+    return id;
+  } catch(cause) {
+    throw SyntaxError("Invalid guideline", {cause});
+  }
 }
