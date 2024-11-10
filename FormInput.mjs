@@ -38,7 +38,14 @@ import {} from "./utils_react.mjs";
   * @property {KEY} 0 The key
   */
 
-
+ /**
+  * The map entry with default.
+  * @template KEY The key type.
+  * @template VALUE The value type.
+  * @typedef {[key:KEY, value: VALUE]} MapEntry
+  * @property {KEY} 0 The key
+  * @property {VALUE} 1 The value of key.
+  */
  /**
   * The map entry with default.
   * @template KEY The key type.
@@ -46,7 +53,7 @@ import {} from "./utils_react.mjs";
   * @typedef {[key:KEY, value: VALUE, defaultValue?: VALUE]} MapEntryWithDefault
   * @property {KEY} 0 The key
   * @property {VALUE} 1 The value of key.
-  * @oroperty {VALUE} [2] The optional default.
+  * @property {VALUE} [2] The optional default.
   */
   
 /**
@@ -54,7 +61,7 @@ import {} from "./utils_react.mjs";
   * @template KEY The key type.
   * @template VALUE The value type.
   * @param {KEY} key
-  * @returns {SetEntry<KEY} The set entry.
+  * @returns {SetEntry<KEY>} The set entry.
  */
 export function createSetEntry(key) {
   return [key];
@@ -69,7 +76,7 @@ export function createSetEntry(key) {
   * @returns {MapEntry<KEY,VALUE>|MapEntryWithDefault<KEY,VALUE>} The created map entry.
  */
 export function createMapEntry(key, value, defaultValue=undefined) {
-  return defaultValue == null ? [key,value] : [key, value, defaultValue];
+  return defaultValue === undefined ? [key,value] : [key, value, defaultValue];
 }
  
  /**
@@ -83,71 +90,78 @@ export function createMapEntry(key, value, defaultValue=undefined) {
   */
  
  /**
-  * Registry of values.
-  * @template TYPE The registered type.
-  * @template [VALUE=undefined] The value type. 
+  * @template KEY The key of the entry.
+  * @template [VALUE=undefined] The value type of key.
+  * @typedef {SetEntry<KEY>|MapEntry<KEY,VALUE>|MapEntryWithDefault<KEY,VALUE>} RegistryEntry
   */
- export class Registry {
-   
-   /**
-    * The entries of the map.
-    * @type {(SetEntry<TYPE>|MapEntry<TYPE,VALUE>|MapEntryWithDefault<TYPE, VALUE>)[]}
-    */
-   #entries = [];
-   
-   /**
-    * 
-    */
-   _arrayEntry(array) {
-     
-   }
-   
-   _add(entry) {
-     if (Array.isArray(entry)) {
-       const added = this._arrayEntry(entry);
-     } else if (entry instanceof Object) {
-       const added = this._objectEntry(entry);
-     }
-    throw new SyntaxError("Invalid entry");
-   }
-   
-   /**
-    * Create a new name registry.
-    * @param {Iterable<string>} [entries=[]] The initial entries.
-    */
-   constructor(entries=[], options={}) {
-     super();
-   }
-   /**
-    * Add a name to registry.
-    * @param {string} name The addee name.
-    * @throws {SyntaxError} The name was invalid.
-    * @throws {RangeError} The name was reserved.
-    */
-   register(name) {
-     
-   }
-   
-   has() {
-     
-   }
-   
-   keys() {
-     
-   }
- }
  
+     
+
+ /**
+  * Create new registry of names.
+  * @returns {Set<string>}
+  */
  export function createNameRegistry() {
-   
+   return /** @type {Set<string>} */ new Set();
  }
 
+/**
+ * A hook dealing with an optional id.
+ * @param {string} [id] The optional idengifier.
+ * @returns {string} The given id, or a new unique identifier, if the id is not defined.
+ */
+export function useOptionalId(id=undefined) {
+  if (id != null) {
+    return id;
+  }
+  return useId();
+}
+
+export function UncontrolledSelectInput(props) {
+  const id = useOptionalId(props.id);
+  const [value, setValue] = useState( props.defaultValue);
+  const [choices, setChoises] = useState( props.items == null ? [] : [...props.items]);
+  const entryValue = (value) => {
+    if (props.itemLabel) {
+      return props.itemLabel(value);
+    }
+    return ""+value;
+  };
+  /**
+   * @callback
+   * @param {Event} event The handled event.
+   */
+  const handleChange = event => {
+    event.preventDefault();
+    try {
+    setValue(event.target.value);
+    if (props.onChange) {
+      props.onChange(event);
+    }
+    } catch (err) {
+      console.error(`Select[${id}]: Exception on vaålue change:`, err);
+      event.target.value = value;
+      
+    }
+  }
+  return (<Select name={props.name} id={props.id} value={value} onChange={handleChange}>{
+    choices.map( (entry,index) => (<MenuItem key={`option-${index}`} value={entry}>{entryValue(entry)}</MenuItem>))
+  }</Select>)
+}
 
 /**
  * @template [TYPE] The value type.
  * @param {CommonFormOptions &(ControlledValued<TYPE> | UncontrolledValued<TYPE>)} props The properties.
  */
 export function SelectFormInput(props) {
-  
+  const id = props.id == null ? useId() : props.id;
+  const label = <InputLabel htmlFor={id}>{props.label}</InputLabel>;
+  return (<div>
+  {label}
+  <Select id={id} labelId={labelId} >{
+    items.map( entry => (<MenuItem value={item.value}></MenuItem>))
+  }</Select>
+  </div>);
 }
 
 /**
@@ -170,27 +184,6 @@ export function useHelperText(props) {
     return (<HelperText {...props} ref={ref} />);
   }
   return [createHelper(ref, props), ref];
-}
-
-export function SelectFormInput(props) {
-  const [items, setItems] = useState([]);
-  const labelId = useId();
-  const id = useId();
-  
-  const createLabel = (val) => (val == null ? (props.label || "Select value"): `${val}`)
-  
-  return (<section>
-  {props.label && !props.hideLabel && <InputLabel id={labelId}>{props.label}</InputLabel>}
-  <Select
-  labelId={labelId}
-  id={id}
-  label={props.label}
-  value={props.value}
-  onChange={props.onChange}
-  >{
-    items.map((item, index) => (<MenuItem key={`item-${index}`} value={item}>{createLabel(item)}</MenuItem>))
-  }</Select>
-  </section>);
 }
 
 export function BaseFormInput(props) {
